@@ -1,0 +1,208 @@
+from PyQt5.QtWidgets import (
+    QApplication as Приложение,
+    QWidget as Окно, 
+    QHBoxLayout as Горизонтальный,
+    QVBoxLayout as Вертикальный,
+    QPushButton as Кнопка,
+    QLineEdit as ПолеВвода,
+    QLabel as Текст)
+from random import randint
+
+
+приложение = Приложение([])
+окно = Окно()
+контейнер = Вертикальный()
+
+
+окно2 = Окно()
+контейнер2 = Вертикальный()
+
+
+база_данных = {}
+
+
+##### Форма регистрации
+заголовок = Текст("Авторизация")
+логин_поле = ПолеВвода()
+почта_поле = ПолеВвода()
+фио_поле = ПолеВвода()
+пароль_поле = ПолеВвода()
+повторите_поле = ПолеВвода()
+ошибки = Текст("")
+регистрация = Кнопка("Отправить")
+
+
+логин_поле.setStyleSheet("""
+border-width: 2px;
+border-style: solid;
+border-color: gray;
+border-radius: 8px;
+padding: 4px;
+""")
+почта_поле.setStyleSheet("""
+border-width: 2px;
+border-style: solid;
+border-color: gray;
+border-radius: 8px;
+padding: 4px;
+""")
+фио_поле.setStyleSheet("""
+border-width: 2px;
+border-style: solid;
+border-color: gray;
+border-radius: 8px;
+padding: 4px;
+""")
+пароль_поле.setStyleSheet("""
+border-width: 2px;
+border-style: solid;
+border-color: gray;
+border-radius: 8px;
+padding: 4px;
+""")
+повторите_поле.setStyleSheet("""
+border-width: 2px;
+border-style: solid;
+border-color: gray;
+border-radius: 8px;
+padding: 4px;
+""")
+регистрация.setStyleSheet("""
+background-color: #343c44;
+color: white;
+margin-left: 16px;
+margin-right: 16px;
+padding-top: 8px;
+padding-bottom: 8px;
+border-radius: 8px;
+font-size: 16px;
+font-family: arial, "serif";
+font-weight: bold;
+""")
+заголовок.setStyleSheet("""
+font-size: 16px;
+font-family: arial, "serif";
+font-weight: bold;
+width: 128px;
+margin: 0 auto;
+""")
+
+def ошибки_красные():
+    ошибки.setStyleSheet("""
+    font-family: arial, "serif";
+    font-weight: bold;
+    width: 128px;
+    margin: 0 auto;
+    color: red;
+    """)
+def ошибки_зеленые():
+    ошибки.setStyleSheet("""
+    font-family: arial, "serif";
+    font-weight: bold;
+    width: 128px;
+    margin: 0 auto;
+    color: green;
+    """)
+
+
+логин_поле.setPlaceholderText("логин")
+почта_поле.setPlaceholderText("почта")
+фио_поле.setPlaceholderText("ФИО")
+пароль_поле.setPlaceholderText("пароль")
+повторите_поле.setPlaceholderText("повторите пароль")
+
+
+def содержит_ли_число(пароль):
+    for символ in пароль:
+        if символ.isdigit():
+            return True
+    return False
+
+
+def позаказать_вход():
+    почта_поле.hide()
+    фио_поле.hide()
+    повторите_поле.hide()
+    ошибки.setText("")
+    регистрация.clicked.connect(при_входе)
+    регистрация.setText("отправить")
+
+
+def при_регистрации():
+    логин = логин_поле.text()
+    почта = почта_поле.text()
+    фио = фио_поле.text()
+    пароль = пароль_поле.text()
+    повторите = повторите_поле.text()
+    if len(пароль) < 8:
+        ошибки.setText("Длина пароля\nдолжна быть\nбольше 8 символов")
+        ошибки_красные()
+    elif not содержит_ли_число(пароль):
+        ошибки.setText("Пароль должен содержать числа")
+        ошибки_красные()
+    elif len(логин) == 0:
+        ошибки.setText("Поле логин обезательное для заполнения")
+        ошибки_красные()
+    elif len(почта) == 0:
+        ошибки.setText("Поле почта обезательное для заполнения")
+        ошибки_красные()
+    elif len(фио) == 0:
+        ошибки.setText("Поле ФИО обезательное для заполнения")
+        ошибки_красные()
+    elif пароль != повторите:
+        ошибки.setText("Пароли должны совподать")
+        ошибки_красные()
+    elif '@' not in почта:
+        ошибки.setText("Почта неправильная")
+        ошибки_красные()
+    elif '.' not in почта:
+        ошибки.setText("Почта неправильная")
+        ошибки_красные()
+    else:
+        ошибки.setText("Регистрация прошла успешно")
+        ошибки_зеленые()
+        регистрация.setText("Перейти к входу")
+        регистрация.clicked.connect(позаказать_вход)
+        
+        база_данных[логин] = {"почта": почта, "пароль": пароль, "фио": фио, "логин": логин}
+регистрация.clicked.connect(при_регистрации)
+
+
+def при_входе():
+    логин = логин_поле.text()
+    пароль = пароль_поле.text()
+    if база_данных[логин]["пароль"] == пароль:
+        ошибки.setText("успешно, загрузка профиля...")
+
+        почта = база_данных[логин]["почта"]
+        фио = база_данных[логин]["фио"]
+
+        контейнер2.addWidget(Текст(f"Ваш логин: {логин}"))
+        контейнер2.addWidget(Текст(f"Ваша почта: {почта}"))
+        контейнер2.addWidget(Текст(f"Вашо фио: {фио}"))
+        контейнер2.addWidget(Текст(f"Ваш пароль: {пароль}"))
+        контейнер2.addWidget(Текст(f"Ваша зарплата: {randint(100_000, 1_000_000)}"))
+        
+        окно2.show()
+        ошибки.setText("ваш профиль загружен!")
+    else:
+        ошибки.setText("неверный логин или пароль")
+
+
+контейнер.addWidget(заголовок)
+контейнер.addWidget(логин_поле)
+контейнер.addWidget(почта_поле)
+контейнер.addWidget(фио_поле)
+контейнер.addWidget(пароль_поле)
+контейнер.addWidget(повторите_поле)
+контейнер.addWidget(ошибки)
+контейнер.addWidget(регистрация)
+#####
+
+
+окно2.setWindowTitle("Личный кабинет")
+окно2.setLayout(контейнер2)
+окно.setWindowTitle("Приложение Авторизации")
+окно.setLayout(контейнер)
+окно.show()
+приложение.exec_()
